@@ -83,17 +83,22 @@
     const API_URL = 'https://script.google.com/macros/s/AKfycbyaaPZ-KcL3b9VuYswFt4y2BMI_wmeZLx2zf8wh25GxfCy2WULu9b6FW2cdI0c49SzCHA/exec';
     let cardData = [];
 
-    async function fetchCardData() {
-      try {
-        const res = await fetch(API_URL);
-        const data = await res.json();
-        cardData = data;
-        populateCardOptions();
-      } catch (e) {
-        alert('カードデータの取得に失敗しました。');
-        console.error(e);
-      }
+     async function fetchCardData() {
+    try {
+      const res = await fetch(API_URL);
+      const data = await res.json();
+      cardData = data;
+      populateCardOptions();
+
+      // ✅ 初期表示で0番目を表示
+      document.getElementById('cardSelect').value = 0;
+      renderBenefits(cardData[0]);
+
+    } catch (e) {
+      alert('カードデータの取得に失敗しました。');
+      console.error(e);
     }
+  }
 
     function populateCardOptions() {
       const select = document.getElementById('cardSelect');
@@ -113,24 +118,28 @@
       });
     }
 
-    function renderBenefits(card) {
+
+      function renderBenefits(card) {
       const tbody = document.getElementById('benefitsTable').querySelector('tbody');
       tbody.innerHTML = '';
       for (let i = 1; i <= 10; i++) {
-        const name = card[`特典${i}`];
+        const name = card[`特典${i}`] || '';
         const base = card[`特典${i}_目安`] || 0;
-        if (name) {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${name}</td>
-            <td>${base} 円</td>
-            <td><input type="number" min="0" data-index="${i}" placeholder="金額を入力（円）"></td>
-          `;
-          tbody.appendChild(tr);
-        }
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><input type="text" value="${name}" data-benefit-name="${i}" placeholder="特典名を入力"></td>
+          <td>${base.toLocaleString()} 円</td>
+          <td><input type="number" min="0" data-index="${i}" placeholder="金額を入力（円）"></td>
+        `;
+        tbody.appendChild(tr);
       }
       document.getElementById('resultBox').classList.add('hidden');
     }
+
+
+
+    
 
     function calculate() {
       const select = document.getElementById('cardSelect');
